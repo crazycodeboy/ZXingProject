@@ -1,18 +1,3 @@
-/*
- * Copyright (C) 2008 ZXing authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.dtr.zxing.activity;
 
 import java.io.IOException;
@@ -48,9 +33,8 @@ import com.google.zxing.Result;
  * thread. It draws a viewfinder to help the user place the barcode correctly,
  * shows feedback as the image processing is happening, and then overlays the
  * results when a scan is successful.
- * 
- * @author dswitkin@google.com (Daniel Switkin)
- * @author Sean Owen
+ * @author JPH
+ * @Date 2015-3-17 下午6:15:33
  */
 public final class CaptureActivity extends Activity implements SurfaceHolder.Callback {
 
@@ -81,11 +65,9 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-
 		Window window = getWindow();
 		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		setContentView(R.layout.activity_capture);
-
 		scanPreview = (SurfaceView) findViewById(R.id.capture_preview);
 		scanContainer = (RelativeLayout) findViewById(R.id.capture_container);
 		scanCropView = (RelativeLayout) findViewById(R.id.capture_crop_view);
@@ -105,7 +87,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 	@Override
 	protected void onResume() {
 		super.onResume();
-
 		// CameraManager must be initialized here, not in onCreate(). This is
 		// necessary because we don't
 		// want to open the camera driver and measure the screen size if we're
@@ -114,9 +95,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 		// wrong size and partially
 		// off screen.
 		cameraManager = new CameraManager(getApplication());
-
 		handler = null;
-
 		if (isHasSurface) {
 			// The activity was paused but not stopped, so the surface still
 			// exists. Therefore
@@ -176,10 +155,8 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 	/**
 	 * A valid barcode has been found, so give an indication of success and show
 	 * the results.
-	 * 
 	 * @param rawResult
 	 *            The contents of the barcode.
-	 * 
 	 * @param bundle
 	 *            The extras
 	 */
@@ -236,7 +213,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 
 		});
 		builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				finish();
@@ -267,7 +243,8 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 		scanCropView.getLocationInWindow(location);
 
 		int cropLeft = location[0];
-		int cropTop = location[1] - getStatusBarHeight();
+//		int cropTop = location[1] - getStatusBarHeight();
+		int cropTop = scanCropView.getTop();
 
 		int cropWidth = scanCropView.getWidth();
 		int cropHeight = scanCropView.getHeight();
@@ -290,13 +267,18 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 		mCropRect = new Rect(x, y, width + x, height + y);
 	}
 
+	/**
+	 * 获取状态栏的高度
+	 * @return
+	 */
 	private int getStatusBarHeight() {
 		try {
 			Class<?> c = Class.forName("com.android.internal.R$dimen");
 			Object obj = c.newInstance();
 			Field field = c.getField("status_bar_height");
 			int x = Integer.parseInt(field.get(obj).toString());
-			return getResources().getDimensionPixelSize(x);
+			int titleHeight=findViewById(R.id.rlTitle).getHeight();//标题栏的高度
+			return getResources().getDimensionPixelSize(x)+titleHeight;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
